@@ -1,0 +1,31 @@
+{
+  "name": "S",
+  "version": "0.0.0",
+  "description": "Statistics in JavaScript",
+  "main": "src/core.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/skyl/S.js"
+  },
+  "keywords": [
+    "stats",
+    "regression",
+    "logistic"
+  ],
+  "author": "Skylar Saveland",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/skyl/S.js/issues"
+  },
+  "homepage": "https://github.com/skyl/S.js",
+  "dependencies": {
+    "chai": "^2.0.0",
+    "mocha": "^2.1.0"
+  }
+}
