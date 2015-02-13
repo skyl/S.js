@@ -156,28 +156,58 @@ describe "S.Matrix", () ->
 		m2 = new S.Matrix([[0, 2, 3]])
 		expect(m.subtract(m2).mtx).to.be.deep.equal([[1, 0, 1]])
 
+	it ".add(other) returns correct matrix", () ->
+		# ...
+		m1 = new S.Matrix([
+			[1, 2, 3]
+			[9, 8, 7]
+		])
+		m2 = new S.Matrix([
+			[0.5, 1.5, 2.5]
+			[3.5, 4.5, 5.5]
+		])
+		m3 = m1.add(m2)
+		expect(m3.mtx).to.be.deep.equal([
+			[1.5, 3.5, 5.5]
+			[12.5, 12.5, 12.5]
+		])
 
-y = [
-	52.21, 53.12, 54.48, 55.84, 57.20, 58.57, 59.93, 61.29,
-	63.11, 64.47, 66.28, 68.10, 69.92, 72.19, 74.46
-]
-x = new S.Matrix(
-    [1.47,1.50,1.52,1.55,1.57,1.60,1.63,1.65,1.68,1.70,1.73,1.75,
-     1.78,1.80,1.83
-    ].map (v) ->
-    	[Math.pow(v,0), Math.pow(v,1), Math.pow(v,2)]
-)
-coeff = new S.ColumnVector([
-	128.8128035798277
-	-143.1620228653037
-	61.960325442985436
-])
-describe "S.ColumnVector", () ->
+	#it ".div(n) returns correct matrix", () ->
+
+
+#describe "S.ColumnVector", () ->
+
+
+describe "S.IdentityMatrix", () ->
+	it "constructor produces correct matrix", () ->
+		m = new S.IdentityMatrix(3)
+		expect(m.mtx).to.be.deep.equal(id_3_by_3)
+
+
+describe "Basic Regression", () ->
+	y = new S.ColumnVector([
+		52.21, 53.12, 54.48, 55.84, 57.20, 58.57, 59.93, 61.29,
+		63.11, 64.47, 66.28, 68.10, 69.92, 72.19, 74.46
+	])
+	X = new S.Matrix(
+	    [1.47,1.50,1.52,1.55,1.57,1.60,1.63,1.65,1.68,1.70,1.73,1.75,
+	     1.78,1.80,1.83
+	    ].map (v) ->
+	    	[Math.pow(v,0), Math.pow(v,1), Math.pow(v,2)]
+	)
+	coeff = new S.ColumnVector([
+		128.8128035798277
+		-143.1620228653037
+		61.960325442985436
+	])
 	it ".regression_coefficients() are correct", () ->
-		outcome = new S.ColumnVector(y)
-		[coefficients, errors] = outcome.regression_coefficients(x)
-		expect(coefficients.mtx).to.be.deep.equal(coeff.mtx)
-		expect(outcome.mtx).to.be.deep.equal(x.mult(coeff).add(errors).mtx)
+		regression = new S.Regression(y, X)
+		regression.run()
+		
+		expect(regression.B.mtx).to.be.deep.equal(coeff.mtx)
+		expect(y.mtx).to.be.deep.equal(
+			X.mult(regression.B).add(regression.e).mtx
+		)
 		#console.log outcome.mtx
 		#console.log "="
 		#console.log x.mtx
@@ -188,8 +218,8 @@ describe "S.ColumnVector", () ->
 	it ".regression_coefficients() are correct simple", () ->
 		# simple model with 100 prediction success
 		# X0, "intercept" coefficient is 0, X1 coefficient is 1
-		outcome = new S.ColumnVector([50, 60, 70, 80, 90, 100])
-		x = new S.Matrix([
+		y = new S.ColumnVector([50, 60, 70, 80, 90, 100])
+		X = new S.Matrix([
 			[1, 50]
 			[1, 60]
 			[1, 70]
@@ -197,20 +227,58 @@ describe "S.ColumnVector", () ->
 			[1, 90]
 			[1, 100]
 		])
-		[coefficients, errors] = outcome.regression_coefficients(x)
+		regression = new S.Regression(y, X)
+		regression.run()
 		e = 0.00000001
-		expect(coefficients.mtx[0][0]).to.be.closeTo(0, e)
-		expect(coefficients.mtx[1][0]).to.be.closeTo(1, e)
+		expect(regression.B.mtx[0][0]).to.be.closeTo(0, e)
+		expect(regression.B.mtx[1][0]).to.be.closeTo(1, e)
 
 
 # http://reliawiki.org/index.php/Multiple_Linear_Regression_Analysis
-#describe "Multiple Linear Regression Analysis"
+
+describe "Multiple Linear Regression Analysis", () ->
+	outcome = new S.ColumnVector([
+		251.3, 251.3, 248.3, 267.5, 273.0, 276.5, 270.3, 274.9, 285.0,
+		290.0, 297.0, 302.5, 304.5, 309.3, 321.7, 330.7, 349.0
+	])
+	X = new S.Matrix([
+		[1, 41.9, 29.1]
+		[1, 43.4, 29.3]
+		[1, 43.9, 29.5]
+		[1, 44.5, 29.7]
+		[1, 47.3, 29.9]
+		[1, 47.5, 30.3]
+		[1, 47.9, 30.5]
+		[1, 50.2, 30.7]
+		[1, 52.8, 30.8]
+		[1, 53.2, 30.9]
+		[1, 56.7, 31.5]
+		[1, 57.0, 31.7]
+		[1, 63.5, 31.9]
+		[1, 65.3, 32.0]
+		[1, 71.1, 32.1]
+		[1, 77.0, 32.5]
+		[1, 77.8, 32.9]
+	])
+	regression = new S.Regression(outcome, X)
+	regression.run()
+	B = [-153.51, 1.24, 12.08]
+
+	it "regression analysis produces correct coefficients", () ->
+		for i in [0..regression.B.mtx[0].length - 1]
+			expect(regression.B.mtx[0][i]).to.be.closeTo(B[i], 0.1)
+
+	varcovarMat = new S.Matrix([
+		[10176.7446, 37.1445, -395.8261]
+		[37.1445, 0.1557, -1.481]
+		[-395.8261, -1.481, 15.4629]
+	])
+	it "regression analysis produces correct var/covar matrix", () ->
+		vcvM = regression.varCovar
+		for i in [0..vcvM.height - 1]
+			for j in [0..vcvM.width - 1]
+				expect(vcvM.mtx[i][j]).to.be.closeTo(varcovarMat.mtx[i][j], 0.001)
 
 
-
-describe "S.IdentityMatrix", () ->
-	it "constructor produces correct matrix", () ->
-		m = new S.IdentityMatrix(3)
-		expect(m.mtx).to.be.deep.equal(id_3_by_3)
 
 

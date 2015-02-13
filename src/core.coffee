@@ -41,8 +41,7 @@ class Matrix
     return result
 
   pow: (n) ->
-    # raise every member to a power
-    # return new Matrix
+    # raise every member to a power, return new Matrix
     res = []
     for i in [0..@height - 1]
       res[i] = []
@@ -123,21 +122,41 @@ class Matrix
         res[i][j] = @mtx[i][j] + other.mtx[i][j]
     return new Matrix(res)
 
+  div: (n) ->
+    # divide each member by n and return a new matrix
+    res = []
+    for i in [0..@height - 1]
+      res[i] = []
+      for j in [0..@width - 1]
+        res[i][j] = @mtx[i][j] / n
+    return new Matrix(res)
+
+  # TODO: DRY?
+  smult: (n) ->
+    # scalar multiplication of matrix
+    res = []
+    for i in [0..@height - 1]
+      res[i] = []
+      for j in [0..@width - 1]
+        res[i][j] = @mtx[i][j] * n
+    return new Matrix(res)
+
+  colmeans: (df = 0) ->
+    # returns a matrix with 1 row with the mean for each column
+    means = []
+    for i in [0..@height - 1]
+      for j in [0..@width - 1]
+        if means[j] is undefined
+          means[j] = @mtx[i][j]
+        else
+          means[j] += @mtx[i][j]
+    return new Matrix([means]).div(@height - df)
+
 
 class ColumnVector extends Matrix
 
   constructor: (array) ->
     super(array.map (v) -> [v])
-
-  regression_coefficients: (X) ->
-    # outcome is `this`
-    X_t = X.transposed()
-    B = X_t.mult(X).inverse().mult(X_t).mult @
-    XB = X.mult(B)
-    e = @subtract XB
-    return [B, e]
-
-  #var_covar_matrix: (X) ->
 
 
 class IdentityMatrix extends Matrix
@@ -152,6 +171,20 @@ class IdentityMatrix extends Matrix
         @mtx[i][j] = if i is j then 1 else 0
 
 
+class Regression
+  constructor: (@y, @X) ->
+
+  run: () ->
+    X_t = @X.transposed()
+    XXinverse = X_t.mult(@X).inverse()
+    @B = XXinverse.mult(X_t).mult(@y)
+    XB = @X.mult(@B)
+    @e = @y.subtract XB
+    @sigma2 = @e.pow(2).colmeans(@X.width).mtx[0][0]
+    @varCovar = XXinverse.smult(@sigma2)
+
+
 S.Matrix = Matrix
 S.ColumnVector = ColumnVector
 S.IdentityMatrix = IdentityMatrix
+S.Regression = Regression
