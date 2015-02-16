@@ -264,6 +264,9 @@ describe "Multiple Linear Regression Analysis", () ->
 	regression.run()
 	B = [-153.51, 1.24, 12.08]
 
+	#console.log regression.H
+	#console.log regression.SSr
+
 	it "regression analysis produces correct coefficients", () ->
 		for i in [0..regression.B.mtx[0].length - 1]
 			expect(regression.B.mtx[0][i]).to.be.closeTo(B[i], 0.1)
@@ -278,6 +281,24 @@ describe "Multiple Linear Regression Analysis", () ->
 		for i in [0..vcvM.height - 1]
 			for j in [0..vcvM.width - 1]
 				expect(vcvM.mtx[i][j]).to.be.closeTo(varcovarMat.mtx[i][j], 0.001)
+
+	it "produces correct H matrix", () ->
+		expect(regression.H.mtx[0][0]).to.be.closeTo(0.27552, 0.001)
+
+	it "produces correct SSr", () ->
+		expect(regression.SSr).to.be.closeTo(12816.35, 0.01)
+
+	it "produces correct MSr", () ->
+		expect(regression.MSr).to.be.closeTo(6408.17, 0.01)
+
+	it "produces correct SSe", () ->
+		expect(regression.SSe).to.be.closeTo(423.37, 0.01)
+
+	it "produces correct MSe", () ->
+		expect(regression.MSe).to.be.closeTo(30.24, 0.01)
+
+	it "produces correct f0", () ->
+		expect(regression.f0).to.be.closeTo(211.9, 0.01)
 
 
 

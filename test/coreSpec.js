@@ -180,7 +180,7 @@
       return _results;
     });
     varcovarMat = new S.Matrix([[10176.7446, 37.1445, -395.8261], [37.1445, 0.1557, -1.481], [-395.8261, -1.481, 15.4629]]);
-    return it("regression analysis produces correct var/covar matrix", function() {
+    it("regression analysis produces correct var/covar matrix", function() {
       var i, j, vcvM, _i, _ref1, _results;
       vcvM = regression.varCovar;
       _results = [];
@@ -195,6 +195,24 @@
         })());
       }
       return _results;
+    });
+    it("produces correct H matrix", function() {
+      return expect(regression.H.mtx[0][0]).to.be.closeTo(0.27552, 0.001);
+    });
+    it("produces correct SSr", function() {
+      return expect(regression.SSr).to.be.closeTo(12816.35, 0.01);
+    });
+    it("produces correct MSr", function() {
+      return expect(regression.MSr).to.be.closeTo(6408.17, 0.01);
+    });
+    it("produces correct SSe", function() {
+      return expect(regression.SSe).to.be.closeTo(423.37, 0.01);
+    });
+    it("produces correct MSe", function() {
+      return expect(regression.MSe).to.be.closeTo(30.24, 0.01);
+    });
+    return it("produces correct f0", function() {
+      return expect(regression.f0).to.be.closeTo(211.9, 0.01);
     });
   });
 

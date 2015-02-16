@@ -171,10 +171,26 @@ class IdentityMatrix extends Matrix
         @mtx[i][j] = if i is j then 1 else 0
 
 
+class OnesMatrix extends Matrix
+  constructor: (height, width) ->
+    if width is undefined
+      width = height
+    res = []
+    for i in [0..height - 1]
+      res[i] = []
+      for j in [0..width - 1]
+        res[i][j] = 1
+    super(res)
+
+
 class Regression
   constructor: (@y, @X) ->
 
   run: () ->
+    # @B is the coefficients columnvector
+    # @e is the errors columnvector
+    # @sigma2 is the MSE - mean squared error (TODO: df?)
+    # @varCovar is the variance/covariance matrix
     X_t = @X.transposed()
     XXinverse = X_t.mult(@X).inverse()
     @B = XXinverse.mult(X_t).mult(@y)
@@ -182,6 +198,23 @@ class Regression
     @e = @y.subtract XB
     @sigma2 = @e.pow(2).colmeans(@X.width).mtx[0][0]
     @varCovar = XXinverse.smult(@sigma2)
+    @H = @X.mult(XXinverse).mult(X_t)
+    #console.log @H
+    #console.log @B
+    #console.log @e
+    n = @y.height
+    y_t = @y.transposed()
+    @SSr = y_t.mult(
+      @H.subtract(
+        new OnesMatrix(n).smult(1.0 / n)
+      )
+    ).mult(@y).mtx[0][0]
+
+    @dof = @X.width - 1
+    @MSr = @SSr / @dof
+    @SSe = y_t.mult(new IdentityMatrix(n).subtract(@H)).mult(@y).mtx[0][0]
+    @MSe = @SSe / (n - (@dof + 1))
+    @f0 = @MSr / @MSe
 
 
 S.Matrix = Matrix
