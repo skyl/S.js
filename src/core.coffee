@@ -1,4 +1,5 @@
-global.S = {}
+if global.S is undefined
+  global.S = {}
 
 
 class Matrix
@@ -91,15 +92,15 @@ class Matrix
       throw "error: no inverse for non-square matrix"
 
     I = new IdentityMatrix(@height)
-    for i in [0..@height - 1]  
+    for i in [0..@height - 1]
       @mtx[i] = @mtx[i].concat(I.mtx[i])
     @width *= 2
     @toReducedRowEchelonForm()
- 
+
     for i in [0..@height - 1]
       @mtx[i].splice 0, @height
     @width /= 2
-    
+
     return @
 
   subtract: (other) ->
