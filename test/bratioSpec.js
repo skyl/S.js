@@ -8,6 +8,35 @@
 
   eps = 0.0000000000000001;
 
+  describe("fpser", function() {
+    return it("x=0.1, a=1.0, b=0.5e-16 returns small", function() {
+      var w;
+      w = S.fpser(1.0, 0.5e-16, 0.1);
+      return expect(w).to.be.closeTo(0, eps);
+    });
+  });
+
+  describe("apser", function() {
+    return it("a=0.1e-15, b=0.5, x=0.5", function() {
+      var w;
+      w = S.apser(0.1e-15, 0.5, 0.5, 0.1e-15);
+      return expect(w).to.be.closeTo(0.1762746899292226e-15, eps);
+    });
+  });
+
+  describe("psi", function() {
+    it("psi(5.0) returns close to 1.506117701530457", function() {
+      var r;
+      r = S.psi(5.0);
+      return expect(r).to.be.closeTo(1.506117701530457, 1.0e-7);
+    });
+    return it("psi(3.0) returns close to 0.9227843880653381", function() {
+      var r;
+      r = S.psi(3.0);
+      return expect(r).to.be.closeTo(0.9227843880653381, 1.0e-7);
+    });
+  });
+
   describe("S.Bratio", function() {
     return it("fpser is working", function() {
       var bratio, w;
